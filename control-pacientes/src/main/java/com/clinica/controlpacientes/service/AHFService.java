@@ -32,7 +32,7 @@ public class AHFService {
         return listDto;
     }
 
-    public AHF_DTO getAHFById(Long id) throws CPException {
+    public AHF_DTO getAHFById(Long id) throws Exception{
         return AHFMapper.mapToDTO(pacienteService.getPacienteById(id));
     }
 

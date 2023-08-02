@@ -32,7 +32,7 @@ public class PAService {
         return listDto;
     }
 
-    public PA_DTO getPAById(Long id) throws CPException {
+    public PA_DTO getPAById(Long id) throws Exception {
         return PAMapper.mapToDTO(pacienteService.getPacienteById(id));
     }
 

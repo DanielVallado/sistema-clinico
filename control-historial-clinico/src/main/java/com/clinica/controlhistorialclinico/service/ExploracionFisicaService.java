@@ -6,20 +6,36 @@ import com.clinica.controlhistorialclinico.error.CHCError;
 import com.clinica.controlhistorialclinico.mapper.ExploracionFisicaMapper;
 import com.clinica.controlhistorialclinico.model.ExploracionFisica;
 import com.clinica.controlhistorialclinico.repository.ExploracionFisicaRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Log4j2
 public class ExploracionFisicaService {
 
-    @Autowired
     private ExploracionFisicaRepository repository;
+    private Environment env;
+
+    @Autowired
+    private void setRepository(ExploracionFisicaRepository repository) {
+        this.repository = repository;
+    }
+
+    @Autowired
+    private void setEnv(Environment env) {
+        this.env = env;
+    }
 
     public List<ExploracionFisicaDTO> getAllExploraciones() throws Exception {
         List<ExploracionFisica> exploracionesFisicas = repository.findAll();
@@ -38,7 +54,6 @@ public class ExploracionFisicaService {
 
     public List<ExploracionFisicaDTO> getExploracionesByPacienteId(Long id) throws Exception {
         PacienteDTO paciente = findPaciente(id);
-        verificarPaciente(paciente);
 
         List<ExploracionFisica> exploracionesFisicas = repository.findAllByPacienteId(id);
         if (exploracionesFisicas.isEmpty()) {
@@ -53,25 +68,27 @@ public class ExploracionFisicaService {
         return exploracionesDTO;
     }
 
-    public ExploracionFisica createExploracion(ExploracionFisica exploracionFisica) throws Exception {
-        PacienteDTO paciente = findPaciente(exploracionFisica.getPacienteId());
-        verificarPaciente(paciente);
-
+    public ExploracionFisica createExploracion(ExploracionFisica exploracionFisica) {
+        findPaciente(exploracionFisica.getPacienteId());
         return repository.save(exploracionFisica);
     }
 
+    @Transactional
     public void deleteExploracionByPacienteId(Long id) {
         repository.deleteAllByPacienteId(id);
     }
 
     private PacienteDTO findPaciente(Long id) {
-        return null;
-    }
+        String url = env.getProperty("URL_CP") + id;
 
-    private void verificarPaciente(PacienteDTO paciente) throws Exception {
-        if (paciente == null) {
-            throw new CHCError("No se encontro al paciente.");
-        }
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
+
+        log.info("Busqueda de paciente con id " + id);
+        ResponseEntity<PacienteDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, PacienteDTO.class);
+
+        return response.getBody();
     }
 
 }

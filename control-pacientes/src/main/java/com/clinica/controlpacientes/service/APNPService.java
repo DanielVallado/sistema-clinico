@@ -32,7 +32,7 @@ public class APNPService {
         return listDto;
     }
 
-    public APNP_DTO getAPNPById(Long id) throws CPException {
+    public APNP_DTO getAPNPById(Long id) throws Exception {
         return APNPMapper.mapToDTO(pacienteService.getPacienteById(id));
     }
 

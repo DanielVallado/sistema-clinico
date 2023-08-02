@@ -10,14 +10,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/exploracion-fisica")
 @Log4j2
 public class ExploracionFisicaController {
 
-    @Autowired
     private ExploracionFisicaService service;
+
+    @Autowired
+    private void setService(ExploracionFisicaService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllExploracionesFisicas() {
@@ -55,9 +60,9 @@ public class ExploracionFisicaController {
             log.info("Exploracion fisica insertada.");
             ExploracionFisica response = service.createExploracion(exploracionFisica);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (CHCError e) {
-            log.error("Paciente no registrado.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Paciente no registrado.");
+        } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
+            log.error("Paciente no encontrado.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Paciente no encontrado.");
         } catch (DataIntegrityViolationException e) {
             log.error("Datos inválidos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");

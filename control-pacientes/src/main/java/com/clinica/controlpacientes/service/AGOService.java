@@ -32,7 +32,7 @@ public class AGOService {
         return listDto;
     }
 
-    public AGO_DTO getAGOById(Long id) throws CPException {
+    public AGO_DTO getAGOById(Long id) throws Exception {
         return AGOMapper.mapToDTO(pacienteService.getPacienteById(id));
     }
 
