@@ -42,12 +42,12 @@ public class PacienteService {
         return pacientesDTO;
     }
 
-    public Paciente getPacienteById(Long id) throws CPException {
+    public Paciente getPacienteById(Long id) throws Exception {
         Optional<Paciente> paciente = repository.findById(id);
         return paciente.orElseThrow(() -> new CPException("No se encontraron datos"));
     }
 
-    public PacienteDTO getPacienteDtoById(Long id) throws CPException {
+    public PacienteDTO getPacienteDtoById(Long id) throws Exception {
         Optional<Paciente> paciente = repository.findById(id);
         if (paciente.isEmpty()) {
             throw new CPException("No se encontraron datos.");

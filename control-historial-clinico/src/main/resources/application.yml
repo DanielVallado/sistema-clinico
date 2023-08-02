@@ -1,0 +1,17 @@
+server:
+  port: 8091
+  servlet:
+    context-path: /control-historial-clinico
+
+spring:
+  application:
+    name: control-historial-clinico
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/control_historial_clinico
+    username: root
+    password: TamiLala#_7
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
