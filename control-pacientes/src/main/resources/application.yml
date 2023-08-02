@@ -1,0 +1,17 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /control-pacientes
+
+spring:
+  application:
+    name: control-pacientes
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/control_pacientes
+    username: root
+    password: TamiLala#_7
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
