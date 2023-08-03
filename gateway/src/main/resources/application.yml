@@ -1,0 +1,37 @@
+server:
+  port: 8072
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: get-control-pacientes
+          uri: lb://control-pacientes
+          predicates:
+            - Path=/control-pacientes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
+        - id: get-control-historial-clinico
+          uri: lb://control-historial-clinico
+          predicates:
+            - Path=/control-historial-clinico/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
