@@ -1,8 +1,8 @@
 package com.clinica.controlhistorialclinico.controller;
 
 import com.clinica.controlhistorialclinico.error.CHCError;
-import com.clinica.controlhistorialclinico.model.ExploracionFisica;
-import com.clinica.controlhistorialclinico.service.ExploracionFisicaService;
+import com.clinica.controlhistorialclinico.model.Diagnostico;
+import com.clinica.controlhistorialclinico.service.DiagnosticoService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,24 +13,24 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
-@RequestMapping("/exploracion-fisica")
+@RequestMapping("/diagnostico")
 @Log4j2
-public class ExploracionFisicaController {
+public class DiagnosticoController {
 
-    private ExploracionFisicaService service;
+    private DiagnosticoService service;
 
     @Autowired
-    private void setService(ExploracionFisicaService service) {
+    private void setService(DiagnosticoService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllExploracionesFisicas() {
+    public ResponseEntity<?> getAllDiagnosticos() {
         try {
-            log.info("Consulta de todos las exploraciones fisicas.");
-            return ResponseEntity.ok().body(service.getAllExploraciones());
+            log.info("Consulta de todos los diagnosticos.");
+            return ResponseEntity.ok().body(service.getAllDiagnosticos());
         } catch (CHCError e) {
-            log.warn("No se encontraron exploraciones fisicas.");
+            log.warn("No se encontraron diagnosticos.");
             log.error(e);
             return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -40,12 +40,12 @@ public class ExploracionFisicaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getExploracionesFisicasById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getDiagnosticosById(@PathVariable("id") Long id) {
         try {
-            log.info("Consulta de todos las exploraciones fisicas por id.");
-            return ResponseEntity.ok().body(service.getExploracionesByPacienteId(id));
+            log.info("Consulta de todos los diagnosticos por id.");
+            return ResponseEntity.ok().body(service.getDiagnosticosByPacienteId(id));
         } catch (CHCError e) {
-            log.warn("No se encontraron exploraciones fisicas.");
+            log.warn("No se encontraron diagnosticos.");
             log.error(e);
             return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -55,10 +55,10 @@ public class ExploracionFisicaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createExploracionFisica(@RequestBody @Validated ExploracionFisica exploracionFisica) {
+    public ResponseEntity<?> createDiagnostico(@RequestBody @Validated Diagnostico exploracionFisica) {
         try {
-            log.info("Exploracion fisica insertada.");
-            ExploracionFisica response = service.createExploracion(exploracionFisica);
+            log.info("Diagnostico insertado.");
+            Diagnostico response = service.createDiagnostico(exploracionFisica);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
             log.error("Paciente no encontrado.");
@@ -67,19 +67,19 @@ public class ExploracionFisicaController {
             log.error("Datos inválidos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");
         } catch (Exception e) {
-            log.error("Error al registrar exploracion fisica: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al registrar la exploracion fisica.");
+            log.error("Error al registrar el diagnostico: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al registrar el diagnostico.");
         }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteExploracionFisica(@PathVariable("id") Long id) {
+    public void deleteDiagnostico(@PathVariable("id") Long id) {
         try {
-            log.info("Exploracion fisica con id %s eliminada".formatted(id));
-            service.deleteExploracionByPacienteId(id);
+            log.info("Diagnostico con id %s eliminado".formatted(id));
+            service.deleteDiagnosticoByPacienteId(id);
         }catch (Exception e) {
-            log.error("Error al eliminar la exploracion fisica: ", e);
+            log.error("Error al eliminar el diagnostico: ", e);
         }
     }
-
+    
 }
