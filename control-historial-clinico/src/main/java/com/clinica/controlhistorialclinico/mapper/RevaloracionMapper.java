@@ -8,6 +8,7 @@ public class RevaloracionMapper {
 
     public static RevaloracionDTO mapToDTO(PacienteDTO paciente, Revaloracion revaloracion) {
         RevaloracionDTO dto = new RevaloracionDTO();
+        dto.setPacienteId(paciente.getId());
         dto.setNombre(paciente.getNombre());
         dto.setApellido(paciente.getApellidos());
         dto.setDescripcion(revaloracion.getDescripcion());

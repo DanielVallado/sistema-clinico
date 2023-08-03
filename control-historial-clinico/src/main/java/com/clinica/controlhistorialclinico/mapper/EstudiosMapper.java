@@ -8,6 +8,7 @@ public class EstudiosMapper {
 
     public static EstudiosDTO mapToDTO(PacienteDTO paciente, Estudios estudios) {
         EstudiosDTO dto = new EstudiosDTO();
+        dto.setPacienteId(paciente.getId());
         dto.setNombre(paciente.getNombre());
         dto.setApellido(paciente.getApellidos());
         dto.setUrl(estudios.getUrl());

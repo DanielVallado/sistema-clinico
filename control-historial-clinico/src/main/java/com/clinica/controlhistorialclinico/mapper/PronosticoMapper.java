@@ -8,6 +8,7 @@ public class PronosticoMapper {
 
     public static PronosticoDTO mapToDTO(PacienteDTO paciente, Pronostico pronostico) {
         PronosticoDTO dto = new PronosticoDTO();
+        dto.setPacienteId(paciente.getId());
         dto.setNombre(paciente.getNombre());
         dto.setApellido(paciente.getApellidos());
         dto.setDescripcion(pronostico.getDescripcion());

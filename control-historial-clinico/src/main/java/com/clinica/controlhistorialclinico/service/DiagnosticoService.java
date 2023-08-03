@@ -2,6 +2,7 @@ package com.clinica.controlhistorialclinico.service;
 
 import com.clinica.controlhistorialclinico.dto.DiagnosticoDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
+import com.clinica.controlhistorialclinico.dto.client.SistemaDTO;
 import com.clinica.controlhistorialclinico.error.CHCError;
 import com.clinica.controlhistorialclinico.mapper.DiagnosticoMapper;
 import com.clinica.controlhistorialclinico.model.Diagnostico;
@@ -70,6 +71,7 @@ public class DiagnosticoService {
 
     public Diagnostico createDiagnostico(Diagnostico diagnostico) {
         findPaciente(diagnostico.getPacienteId());
+        findSistema(diagnostico.getSistemaId());
         return repository.save(diagnostico);
     }
 
@@ -89,6 +91,10 @@ public class DiagnosticoService {
         ResponseEntity<PacienteDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, PacienteDTO.class);
 
         return response.getBody();
+    }
+
+    private SistemaDTO findSistema(Long id) {
+        return null;
     }
 
 }

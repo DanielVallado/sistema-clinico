@@ -11,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class ExploracionFisicaDTO {
 
-    private Long paciente_id;
+    private Long pacienteId;
     private String nombre;
     private String apellido;
     private String descripcion;
