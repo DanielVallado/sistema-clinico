@@ -3,6 +3,7 @@ package com.clinica.controlhistorialclinico.controller;
 import com.clinica.controlhistorialclinico.error.CHCError;
 import com.clinica.controlhistorialclinico.model.ExploracionFisica;
 import com.clinica.controlhistorialclinico.service.ExploracionFisicaService;
+import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/exploracion-fisica")
@@ -29,10 +29,13 @@ public class ExploracionFisicaController {
         try {
             log.info("Consulta de todos las exploraciones fisicas.");
             return ResponseEntity.ok().body(service.getAllExploraciones());
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
         } catch (CHCError e) {
             log.warn("No se encontraron exploraciones fisicas.");
             log.error(e);
-            return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al consultar los datos.");
@@ -44,10 +47,13 @@ public class ExploracionFisicaController {
         try {
             log.info("Consulta de todos las exploraciones fisicas por id.");
             return ResponseEntity.ok().body(service.getExploracionesByPacienteId(id));
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
         } catch (CHCError e) {
             log.warn("No se encontraron exploraciones fisicas.");
             log.error(e);
-            return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al consultar los datos.");
@@ -60,9 +66,9 @@ public class ExploracionFisicaController {
             log.info("Exploracion fisica insertada.");
             ExploracionFisica response = service.createExploracion(exploracionFisica);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
-            log.error("Paciente no encontrado.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Paciente no encontrado.");
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             log.error("Datos inválidos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");

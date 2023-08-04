@@ -1,5 +1,6 @@
 package com.clinica.controlhistorialclinico.service;
 
+import com.clinica.controlhistorialclinico.client.IPacienteClient;
 import com.clinica.controlhistorialclinico.dto.EstudiosDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
 import com.clinica.controlhistorialclinico.error.CHCError;
@@ -9,13 +10,7 @@ import com.clinica.controlhistorialclinico.repository.EstudiosRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +20,7 @@ import java.util.List;
 public class EstudiosService {
 
     private EstudiosRepository repository;
-    private Environment env;
+    private IPacienteClient pacienteClient;
 
     @Autowired
     private void setRepository(EstudiosRepository repository) {
@@ -33,8 +28,8 @@ public class EstudiosService {
     }
 
     @Autowired
-    private void setEnv(Environment env) {
-        this.env = env;
+    private void setPacienteClient(IPacienteClient pacienteClient) {
+        this.pacienteClient = pacienteClient;
     }
 
     public List<EstudiosDTO> getAllEstudios() throws Exception {
@@ -45,7 +40,12 @@ public class EstudiosService {
 
         List<EstudiosDTO> listEstudiosDTO = new ArrayList<>();
         for (Estudios estudio : listEstudios) {
-            PacienteDTO paciente = findPaciente(estudio.getPacienteId());
+            PacienteDTO paciente = pacienteClient.findByPacienteId(estudio.getPacienteId()).getBody();
+
+            if (paciente == null) {
+                throw new CHCError("No se encontro al paciente.");
+            }
+
             listEstudiosDTO.add(EstudiosMapper.mapToDTO(paciente, estudio));
         }
 
@@ -53,7 +53,10 @@ public class EstudiosService {
     }
 
     public List<EstudiosDTO> getEstudiosByPacienteId(Long id) throws Exception {
-        PacienteDTO paciente = findPaciente(id);
+        PacienteDTO paciente = pacienteClient.findByPacienteId(id).getBody();
+        if (paciente == null) {
+            throw new CHCError("No se encontro al paciente.");
+        }
 
         List<Estudios> listEstudios = repository.findAllByPacienteId(id);
         if (listEstudios.isEmpty()) {
@@ -69,26 +72,13 @@ public class EstudiosService {
     }
 
     public Estudios createEstudios(Estudios estudio) {
-        findPaciente(estudio.getPacienteId());
+        pacienteClient.findByPacienteId(estudio.getPacienteId()).getBody();
         return repository.save(estudio);
     }
 
     @Transactional
     public void deleteEstudiosByPacienteId(Long id) {
         repository.deleteAllByPacienteId(id);
-    }
-
-    private PacienteDTO findPaciente(Long id) {
-        String url = env.getProperty("URL_CP") + id;
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
-
-        log.info("Busqueda de paciente con id " + id);
-        ResponseEntity<PacienteDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, PacienteDTO.class);
-
-        return response.getBody();
     }
     
 }

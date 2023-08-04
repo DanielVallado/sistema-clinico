@@ -1,5 +1,6 @@
 package com.clinica.controlhistorialclinico.service;
 
+import com.clinica.controlhistorialclinico.client.IPacienteClient;
 import com.clinica.controlhistorialclinico.dto.PronosticoDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
 import com.clinica.controlhistorialclinico.error.CHCError;
@@ -9,13 +10,7 @@ import com.clinica.controlhistorialclinico.repository.PronosticoRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +20,7 @@ import java.util.List;
 public class PronosticoService {
 
     private PronosticoRepository repository;
-    private Environment env;
+    private IPacienteClient pacienteClient;
 
     @Autowired
     private void setRepository(PronosticoRepository repository) {
@@ -33,8 +28,8 @@ public class PronosticoService {
     }
 
     @Autowired
-    private void setEnv(Environment env) {
-        this.env = env;
+    private void setPacienteClient(IPacienteClient pacienteClient) {
+        this.pacienteClient = pacienteClient;
     }
 
     public List<PronosticoDTO> getAllPronosticos() throws Exception {
@@ -45,7 +40,12 @@ public class PronosticoService {
 
         List<PronosticoDTO> listPronosticosDTO = new ArrayList<>();
         for (Pronostico pronostico : listPronosticos) {
-            PacienteDTO paciente = findPaciente(pronostico.getPacienteId());
+            PacienteDTO paciente = pacienteClient.findByPacienteId(pronostico.getPacienteId()).getBody();
+
+            if (paciente == null) {
+                throw new CHCError("No se encontro al paciente.");
+            }
+
             listPronosticosDTO.add(PronosticoMapper.mapToDTO(paciente, pronostico));
         }
 
@@ -53,7 +53,10 @@ public class PronosticoService {
     }
 
     public List<PronosticoDTO> getPronosticosByPacienteId(Long id) throws Exception {
-        PacienteDTO paciente = findPaciente(id);
+        PacienteDTO paciente = pacienteClient.findByPacienteId(id).getBody();
+        if (paciente == null) {
+            throw new CHCError("No se encontro al paciente.");
+        }
 
         List<Pronostico> listPronosticos = repository.findAllByPacienteId(id);
         if (listPronosticos.isEmpty()) {
@@ -69,7 +72,7 @@ public class PronosticoService {
     }
 
     public Pronostico createPronostico(Pronostico pronostico) {
-        findPaciente(pronostico.getPacienteId());
+        pacienteClient.findByPacienteId(pronostico.getPacienteId()).getBody();
         return repository.save(pronostico);
     }
 
@@ -78,17 +81,5 @@ public class PronosticoService {
         repository.deleteAllByPacienteId(id);
     }
 
-    private PacienteDTO findPaciente(Long id) {
-        String url = env.getProperty("URL_CP") + id;
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
-
-        log.info("Busqueda de paciente con id " + id);
-        ResponseEntity<PacienteDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, PacienteDTO.class);
-
-        return response.getBody();
-    }
     
 }
