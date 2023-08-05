@@ -1,6 +1,6 @@
 package com.clinica.controlhistorialclinico.controller;
 
-import com.clinica.controlhistorialclinico.error.CHCError;
+import com.clinica.controlhistorialclinico.error.CHCException;
 import com.clinica.controlhistorialclinico.model.ExploracionFisica;
 import com.clinica.controlhistorialclinico.service.ExploracionFisicaService;
 import feign.FeignException;
@@ -32,7 +32,7 @@ public class ExploracionFisicaController {
         } catch (FeignException e) {
             log.warn("No se encontro al paciente.");
             return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
-        } catch (CHCError e) {
+        } catch (CHCException e) {
             log.warn("No se encontraron exploraciones fisicas.");
             log.error(e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -43,14 +43,14 @@ public class ExploracionFisicaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getExploracionesFisicasById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getAllExploracionesFisicasById(@PathVariable("id") Long id) {
         try {
             log.info("Consulta de todos las exploraciones fisicas por id.");
             return ResponseEntity.ok().body(service.getExploracionesByPacienteId(id));
         } catch (FeignException e) {
             log.warn("No se encontro al paciente.");
             return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
-        } catch (CHCError e) {
+        } catch (CHCException e) {
             log.warn("No se encontraron exploraciones fisicas.");
             log.error(e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -79,12 +79,29 @@ public class ExploracionFisicaController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteExploracionFisica(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteExploracionFisica(@PathVariable("id") Long id) {
         try {
             log.info("Exploracion fisica con id %s eliminada".formatted(id));
-            service.deleteExploracionByPacienteId(id);
-        }catch (Exception e) {
+            service.deleteExploracion(id);
+            return new ResponseEntity<>("Exploracion fisica con id %s eliminada.".formatted(id), HttpStatus.OK);
+        } catch (Exception e) {
             log.error("Error al eliminar la exploracion fisica: ", e);
+            return new ResponseEntity<>("Error al eliminar la exploracion fisica.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/paciente/{paciente-id}")
+    public ResponseEntity<?> deleteExploracionFisicaByPacienteId(@PathVariable("paciente-id") Long pacienteId) {
+        try {
+            log.info("Exploracion fisica con pacienteId %s eliminado".formatted(pacienteId));
+            service.deleteExploracionByPacienteId(pacienteId);
+            return new ResponseEntity<>("Exploracion fisica con pacienteId %s eliminada.".formatted(pacienteId), HttpStatus.OK);
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente con id %s.".formatted(pacienteId), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error al eliminar la exploracion fisica: ", e);
+            return new ResponseEntity<>("Error al eliminar la exploracion fisica.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

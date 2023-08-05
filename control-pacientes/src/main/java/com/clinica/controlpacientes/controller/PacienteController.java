@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 public class PacienteController {
 
-    @Autowired
     private PacienteService service;
+
+    @Autowired
+    private void setService(PacienteService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllPacientes() {
@@ -69,7 +73,7 @@ public class PacienteController {
         try {
             log.info("Paciente con id %s eliminado".formatted(id));
             service.deletePaciente(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error al eliminar el paciente: ", e);
         }
     }

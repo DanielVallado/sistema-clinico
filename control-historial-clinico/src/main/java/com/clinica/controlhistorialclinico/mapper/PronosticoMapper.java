@@ -4,6 +4,9 @@ import com.clinica.controlhistorialclinico.dto.PronosticoDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
 import com.clinica.controlhistorialclinico.model.Pronostico;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PronosticoMapper {
 
     public static PronosticoDTO mapToDTO(PacienteDTO paciente, Pronostico pronostico) {
@@ -16,5 +19,10 @@ public class PronosticoMapper {
         return dto;
     }
 
+    public static List<PronosticoDTO> mapListToDTOList(List<Pronostico> listPronosticos, PacienteDTO paciente) {
+        return listPronosticos.stream()
+                .map(pronostico -> mapToDTO(paciente, pronostico))
+                .collect(Collectors.toList());
+    }
 
 }

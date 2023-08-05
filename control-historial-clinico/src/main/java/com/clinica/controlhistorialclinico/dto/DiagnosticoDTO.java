@@ -13,7 +13,7 @@ public class DiagnosticoDTO {
     private Long pacienteId;
     private String nombre;
     private String apellido;
-    private Long sistemaId;
+    private String sistema;
     private String descripcion;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

@@ -9,16 +9,20 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 public class PacienteService {
 
-    @Autowired
     private PacienteRepository repository;
+
+    @Autowired
+    private void setRepository(PacienteRepository repository) {
+        this.repository = repository;
+    }
 
     public List<Paciente> getAllPacientes() throws Exception {
         List<Paciente> pacientes = repository.findAll();
@@ -34,12 +38,7 @@ public class PacienteService {
             throw new CPException("No se encontraron datos.");
         }
 
-        List<PacienteDTO> pacientesDTO = new ArrayList<>();
-        for (Paciente paciente : pacientes) {
-            pacientesDTO.add(PacienteMapper.mapToDTO(paciente));
-        }
-
-        return pacientesDTO;
+        return pacientes.stream().map(PacienteMapper::mapToDTO).collect(Collectors.toList());
     }
 
     public Paciente getPacienteById(Long id) throws Exception {

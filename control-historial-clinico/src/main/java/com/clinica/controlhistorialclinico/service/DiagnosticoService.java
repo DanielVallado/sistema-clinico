@@ -1,20 +1,22 @@
 package com.clinica.controlhistorialclinico.service;
 
 import com.clinica.controlhistorialclinico.client.IPacienteClient;
+import com.clinica.controlhistorialclinico.client.ISistemasClient;
 import com.clinica.controlhistorialclinico.dto.DiagnosticoDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
 import com.clinica.controlhistorialclinico.dto.client.SistemaDTO;
-import com.clinica.controlhistorialclinico.error.CHCError;
+import com.clinica.controlhistorialclinico.error.CHCException;
 import com.clinica.controlhistorialclinico.mapper.DiagnosticoMapper;
 import com.clinica.controlhistorialclinico.model.Diagnostico;
 import com.clinica.controlhistorialclinico.repository.DiagnosticoRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -22,6 +24,7 @@ public class DiagnosticoService {
 
     private DiagnosticoRepository repository;
     private IPacienteClient pacienteClient;
+    private ISistemasClient sistemasClient;
 
     @Autowired
     private void setRepository(DiagnosticoRepository repository) {
@@ -33,59 +36,66 @@ public class DiagnosticoService {
         this.pacienteClient = pacienteClient;
     }
 
+    @Autowired
+    private void setSistemasClientClient(ISistemasClient sistemasClient) {
+        this.sistemasClient = sistemasClient;
+    }
+
     public List<DiagnosticoDTO> getAllDiagnosticos() throws Exception {
         List<Diagnostico> listDiagnosticos = repository.findAll();
         if (listDiagnosticos.isEmpty()) {
-            throw new CHCError("No se encontraron datos.");
+            throw new CHCException("No se encontraron datos.");
         }
 
-        List<DiagnosticoDTO> listDiagnosticosDTO = new ArrayList<>();
-        for (Diagnostico diagnostico : listDiagnosticos) {
-            PacienteDTO paciente = pacienteClient.findByPacienteId(diagnostico.getPacienteId()).getBody();
-
-            if (paciente == null) {
-                throw new CHCError("No se encontro al paciente.");
-            }
-
-            listDiagnosticosDTO.add(DiagnosticoMapper.mapToDTO(paciente, diagnostico));
-        }
-
-        return listDiagnosticosDTO;
+        return listDiagnosticos.stream()
+                .map(diagnostico -> DiagnosticoMapper.mapToDTO(getPacienteById(diagnostico.getPacienteId()), getSistemaById(diagnostico.getSistemaId()),diagnostico))
+                .collect(Collectors.toList());
     }
 
-    public List<DiagnosticoDTO> getDiagnosticosByPacienteId(Long id) throws Exception {
-        PacienteDTO paciente = pacienteClient.findByPacienteId(id).getBody();
+    public List<DiagnosticoDTO> getDiagnosticosByPacienteId(Long pacienteId) throws Exception {
+        PacienteDTO paciente = pacienteClient.findPacienteById(pacienteId).getBody();
         if (paciente == null) {
-            throw new CHCError("No se encontro al paciente.");
+            throw new CHCException("No se encontro al paciente.");
         }
 
-        List<Diagnostico> listDiagnosticos = repository.findAllByPacienteId(id);
+        List<Diagnostico> listDiagnosticos = repository.findAllByPacienteId(pacienteId);
         if (listDiagnosticos.isEmpty()) {
-            throw new CHCError("No se encontraron datos.");
+            throw new CHCException("No se encontraron datos.");
         }
 
-        List<DiagnosticoDTO> listDiagnosticosDTO = new ArrayList<>();
-        for (Diagnostico diagnostico : listDiagnosticos) {
-            listDiagnosticosDTO.add(DiagnosticoMapper.mapToDTO(paciente, diagnostico));
-        }
-
-        return listDiagnosticosDTO;
+        return listDiagnosticos.stream()
+                .map(diagnostico -> DiagnosticoMapper.mapToDTO(paciente, getSistemaById(diagnostico.getSistemaId()),diagnostico))
+                .collect(Collectors.toList());
     }
 
     public Diagnostico createDiagnostico(Diagnostico diagnostico) {
-        pacienteClient.findByPacienteId(diagnostico.getPacienteId()).getBody();
-        findSistema(diagnostico.getSistemaId());
+        pacienteClient.findPacienteById(diagnostico.getPacienteId());
+        sistemasClient.findSistemaById(diagnostico.getSistemaId());
         return repository.save(diagnostico);
     }
 
-    @Transactional
-    public void deleteDiagnosticoByPacienteId(Long id) {
-        repository.deleteAllByPacienteId(id);
+    public void deleteDiagnostico(Long id) {
+        repository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteDiagnosticoByPacienteId(Long pacienteId) {
+        repository.deleteAllByPacienteId(pacienteId);
+    }
 
-    private SistemaDTO findSistema(Long id) {
-        return null;
+    @Transactional
+    public void deleteDiagnosticoBySistemaId(Long sistemaId) {
+        repository.deleteAllBySistemaId(sistemaId);
+    }
+
+    private PacienteDTO getPacienteById(Long pacienteId) {
+        ResponseEntity<PacienteDTO> response = pacienteClient.findPacienteById(pacienteId);
+        return response.getBody();
+    }
+
+    private SistemaDTO getSistemaById(Long sistemaId) {
+        ResponseEntity<SistemaDTO> response = sistemasClient.findSistemaById(sistemaId);
+        return response.getBody();
     }
 
 }

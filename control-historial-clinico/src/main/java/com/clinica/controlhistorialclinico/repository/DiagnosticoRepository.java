@@ -11,4 +11,6 @@ public interface DiagnosticoRepository extends JpaRepository<Diagnostico, Long> 
 
     void deleteAllByPacienteId(Long id);
 
+    void deleteAllBySistemaId(Long id);
+
 }

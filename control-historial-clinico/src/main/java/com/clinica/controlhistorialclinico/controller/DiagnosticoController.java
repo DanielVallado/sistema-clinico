@@ -1,8 +1,9 @@
 package com.clinica.controlhistorialclinico.controller;
 
-import com.clinica.controlhistorialclinico.error.CHCError;
+import com.clinica.controlhistorialclinico.error.CHCException;
 import com.clinica.controlhistorialclinico.model.Diagnostico;
 import com.clinica.controlhistorialclinico.service.DiagnosticoService;
+import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/diagnostico")
@@ -29,7 +29,10 @@ public class DiagnosticoController {
         try {
             log.info("Consulta de todos los diagnosticos.");
             return ResponseEntity.ok().body(service.getAllDiagnosticos());
-        } catch (CHCError e) {
+        } catch (FeignException e) {
+            log.warn("Pacientes y/o estudios no encontrados.");
+            return new ResponseEntity<>("Pacientes y/o estudios no encontrados.", HttpStatus.NOT_FOUND);
+        } catch (CHCException e) {
             log.warn("No se encontraron diagnosticos.");
             log.error(e);
             return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
@@ -39,12 +42,15 @@ public class DiagnosticoController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getDiagnosticosById(@PathVariable("id") Long id) {
+    @GetMapping("/{paciente-id}")
+    public ResponseEntity<?> getDiagnosticosByPacienteId(@PathVariable("paciente-id") Long id) {
         try {
             log.info("Consulta de todos los diagnosticos por id.");
             return ResponseEntity.ok().body(service.getDiagnosticosByPacienteId(id));
-        } catch (CHCError e) {
+        } catch (FeignException e) {
+            log.warn("Pacientes y/o estudios no encontrados.");
+            return new ResponseEntity<>("Pacientes y/o estudios no encontrados.", HttpStatus.NOT_FOUND);
+        } catch (CHCException e) {
             log.warn("No se encontraron diagnosticos.");
             log.error(e);
             return new ResponseEntity<>("No se encontraron datos.", HttpStatus.NOT_FOUND);
@@ -55,14 +61,14 @@ public class DiagnosticoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createDiagnostico(@RequestBody @Validated Diagnostico exploracionFisica) {
+    public ResponseEntity<?> createDiagnostico(@RequestBody @Validated Diagnostico diagnostico) {
         try {
             log.info("Diagnostico insertado.");
-            Diagnostico response = service.createDiagnostico(exploracionFisica);
+            Diagnostico response = service.createDiagnostico(diagnostico);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
-            log.error("Paciente no encontrado.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Paciente no encontrado.");
+        } catch (FeignException e) {
+            log.warn("Pacientes y/o estudios no encontrados.");
+            return new ResponseEntity<>("Pacientes y/o estudios no encontrados.", HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             log.error("Datos inválidos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");
@@ -73,12 +79,45 @@ public class DiagnosticoController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDiagnostico(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteDiagnostico(@PathVariable("id") Long id) {
         try {
             log.info("Diagnostico con id %s eliminado".formatted(id));
-            service.deleteDiagnosticoByPacienteId(id);
-        }catch (Exception e) {
+            service.deleteDiagnostico(id);
+            return new ResponseEntity<>("Diagnostico con id %s eliminada.".formatted(id), HttpStatus.OK);
+        } catch (Exception e) {
             log.error("Error al eliminar el diagnostico: ", e);
+            return new ResponseEntity<>("Diagnostico con id %s eliminada.".formatted(id), HttpStatus.OK);
+
+        }
+    }
+
+    @DeleteMapping("/paciente/{paciente-id}")
+    public ResponseEntity<?> deleteDiagnosticoByPacienteId(@PathVariable("paciente-id") Long pacienteId) {
+        try {
+            log.info("Diagnostico con pacienteId %s eliminado".formatted(pacienteId));
+            service.deleteDiagnosticoByPacienteId(pacienteId);
+            return new ResponseEntity<>("Diagnostico con pacienteId %s eliminada.".formatted(pacienteId), HttpStatus.OK);
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente con id %s.".formatted(pacienteId), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error al eliminar el diagnostico: ", e);
+            return new ResponseEntity<>("Error al eliminar el diagnostico.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/sistema/{sistema-id}")
+    public ResponseEntity<?> deleteDiagnosticoBySistemaId(@PathVariable("sistema-id") Long sistemaId) {
+        try {
+            log.info("Diagnostico con pacienteId %s eliminado".formatted(sistemaId));
+            service.deleteDiagnosticoBySistemaId(sistemaId);
+            return new ResponseEntity<>("Diagnostico con sistemaId %s eliminada.".formatted(sistemaId), HttpStatus.OK);
+        } catch (FeignException e) {
+            log.warn("No se encontro el sistema.");
+            return new ResponseEntity<>("No se encontro el sistema con id %s.".formatted(sistemaId), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error al eliminar el diagnostico: ", e);
+            return new ResponseEntity<>("Error al eliminar el diagnostico.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     

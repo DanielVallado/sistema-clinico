@@ -3,17 +3,18 @@ package com.clinica.controlhistorialclinico.service;
 import com.clinica.controlhistorialclinico.client.IPacienteClient;
 import com.clinica.controlhistorialclinico.dto.ExploracionFisicaDTO;
 import com.clinica.controlhistorialclinico.dto.client.PacienteDTO;
-import com.clinica.controlhistorialclinico.error.CHCError;
+import com.clinica.controlhistorialclinico.error.CHCException;
 import com.clinica.controlhistorialclinico.mapper.ExploracionFisicaMapper;
 import com.clinica.controlhistorialclinico.model.ExploracionFisica;
 import com.clinica.controlhistorialclinico.repository.ExploracionFisicaRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -33,53 +34,49 @@ public class ExploracionFisicaService {
     }
 
     public List<ExploracionFisicaDTO> getAllExploraciones() throws Exception {
-        List<ExploracionFisica> exploracionesFisicas = repository.findAll();
-        if (exploracionesFisicas.isEmpty()) {
-            throw new CHCError("No se encontraron datos.");
+        List<ExploracionFisica> listExploracionesFisicas = repository.findAll();
+        if (listExploracionesFisicas.isEmpty()) {
+            throw new CHCException("No se encontraron datos.");
         }
 
-        List<ExploracionFisicaDTO> exploracionesDTO = new ArrayList<>();
-        for (ExploracionFisica exploracion : exploracionesFisicas) {
-            PacienteDTO paciente = pacienteClient.findByPacienteId(exploracion.getPacienteId()).getBody();
-
-            if (paciente == null) {
-                throw new CHCError("No se encontro al paciente.");
-            }
-
-            exploracionesDTO.add(ExploracionFisicaMapper.mapToDTO(paciente, exploracion));
-        }
-
-        return exploracionesDTO;
+        return listExploracionesFisicas.stream()
+                .map(exploracionFisica -> ExploracionFisicaMapper.mapToDTO(getPacienteById(exploracionFisica.getPacienteId()),exploracionFisica))
+                .collect(Collectors.toList());
     }
 
     public List<ExploracionFisicaDTO> getExploracionesByPacienteId(Long id) throws Exception {
-        PacienteDTO paciente = pacienteClient.findByPacienteId(id).getBody();
-
+        PacienteDTO paciente = pacienteClient.findPacienteById(id).getBody();
         if (paciente == null) {
-            throw new CHCError("No se encontro al paciente.");
+            throw new CHCException("No se encontro al paciente.");
         }
 
-        List<ExploracionFisica> exploracionesFisicas = repository.findAllByPacienteId(id);
-        if (exploracionesFisicas.isEmpty()) {
-            throw new CHCError("No se encontraron datos.");
+        List<ExploracionFisica> listExploracionesFisicas = repository.findAllByPacienteId(id);
+        if (listExploracionesFisicas.isEmpty()) {
+            throw new CHCException("No se encontraron datos.");
         }
 
-        List<ExploracionFisicaDTO> exploracionesDTO = new ArrayList<>();
-        for (ExploracionFisica exploracion : exploracionesFisicas) {
-            exploracionesDTO.add(ExploracionFisicaMapper.mapToDTO(paciente, exploracion));
-        }
-
-        return exploracionesDTO;
+        return listExploracionesFisicas.stream()
+                .map(exploracionFisica -> ExploracionFisicaMapper.mapToDTO(paciente,exploracionFisica))
+                .collect(Collectors.toList());
     }
 
     public ExploracionFisica createExploracion(ExploracionFisica exploracionFisica) {
-        pacienteClient.findByPacienteId(exploracionFisica.getPacienteId()).getBody();
+        pacienteClient.findPacienteById(exploracionFisica.getPacienteId());
         return repository.save(exploracionFisica);
     }
 
+    public void deleteExploracion(Long id) {
+        repository.deleteById(id);
+    }
+
     @Transactional
-    public void deleteExploracionByPacienteId(Long id) {
-        repository.deleteAllByPacienteId(id);
+    public void deleteExploracionByPacienteId(Long pacienteId) {
+        repository.deleteAllByPacienteId(pacienteId);
+    }
+
+    private PacienteDTO getPacienteById(Long pacienteId) {
+        ResponseEntity<PacienteDTO> response = pacienteClient.findPacienteById(pacienteId);
+        return response.getBody();
     }
 
 }

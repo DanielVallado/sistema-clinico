@@ -28,6 +28,24 @@ spring:
               args:
                 name: CircuitBreaker
                 fallbackUri: forward:/error
+        - id: get-control-citas
+          uri: lb://control-citas
+          predicates:
+            - Path=/control-citas/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
+        - id: get-control-sistemas
+          uri: lb://control-sistemas
+          predicates:
+            - Path=/control-sistemas/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
 
 eureka:
   client:

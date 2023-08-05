@@ -11,4 +11,6 @@ public interface RevaloracionRepository extends JpaRepository<Revaloracion, Long
 
     void deleteAllByPacienteId(Long id);
 
+    void deleteAllBySistemaId(Long id);
+
 }
