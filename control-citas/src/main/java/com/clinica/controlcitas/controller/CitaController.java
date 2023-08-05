@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +67,7 @@ public class CitaController {
         } catch (FeignException e) {
             log.warn("No se encontro al paciente.");
             return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException | HttpMessageNotReadableException e) {
             log.error("Datos inválidos.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");
         } catch (Exception e) {
@@ -101,5 +102,19 @@ public class CitaController {
             return new ResponseEntity<>("Error al eliminar la cita.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/confirmar-cita")
+    public ResponseEntity<String> confirmarCita(@RequestParam("token") String token) {
+        Cita cita = citaRepository.findByToken(token);
+        if (cita == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cita no encontrada.");
+        }
+
+        cita.setEstatusCita("confirmada");
+        citaRepository.save(cita);
+
+        return ResponseEntity.ok("Cita confirmada exitosamente.");
+    }
+}
 
 }

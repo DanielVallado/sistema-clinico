@@ -1,5 +1,7 @@
 package com.clinica.controlcitas.model;
 
+import com.clinica.controlcitas.enums.EstatusCita;
+import com.clinica.controlcitas.enums.TipoPaciente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +25,15 @@ public class Cita {
     @NonNull
     private Long pacienteId;
     private LocalDateTime fechaHora;
-    private String tipoPaciente;
-    private String estatusCita;
+
+    @Enumerated(EnumType.STRING)
+    private TipoPaciente tipoPaciente;
+
+    @Enumerated(EnumType.STRING)
+    private EstatusCita estatusCita;
     private int noSesion;
     private BigDecimal costoTerapia;
+    private String email;
+    private String numeroTelefonico;
 
 }

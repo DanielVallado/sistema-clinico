@@ -17,6 +17,8 @@ public class CitaMapper {
         dto.setEstatusCita(cita.getEstatusCita());
         dto.setNoSesion(cita.getNoSesion());
         dto.setCostoTerapia(cita.getCostoTerapia());
+        dto.setEmail(cita.getEmail());
+        dto.setNumeroTelefonico(cita.getNumeroTelefonico());
         return dto;
     }
 

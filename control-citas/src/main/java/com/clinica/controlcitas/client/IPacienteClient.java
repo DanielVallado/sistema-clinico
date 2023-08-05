@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface IPacienteClient {
 
     @GetMapping("/{paciente-id}")
-    ResponseEntity<PacienteDTO> findByPacienteId(@PathVariable("paciente-id") Long pacienteId);
+    ResponseEntity<PacienteDTO> findPacienteById(@PathVariable("paciente-id") Long pacienteId);
 
 }

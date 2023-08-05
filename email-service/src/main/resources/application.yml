@@ -1,0 +1,37 @@
+server:
+  port: ${PORT:${SERVER_PORT:0}}
+  servlet:
+    context-path: /email-service
+
+spring:
+  application:
+    name: email-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${email.props.gmail.user}
+    password: ${email.props.gmail.password}
+    properties:
+      mail:
+        smtp:
+          port: 587
+          auth: true
+          transport:
+            protocol: smtp
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: "*"
+        debug: true
+
+email:
+  props:
+    gmail:
+      user: ${email}
+      password: ${password}

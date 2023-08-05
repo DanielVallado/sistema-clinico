@@ -1,5 +1,8 @@
 package com.clinica.controlcitas.dto;
 
+import com.clinica.controlcitas.enums.EstatusCita;
+import com.clinica.controlcitas.enums.TipoPaciente;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,10 +17,14 @@ public class CitaDTO {
     private Long pacienteId;
     private String nombre;
     private String apellidos;
+
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime fechaHora;
-    private String tipoPaciente;
-    private String estatusCita;
+    private TipoPaciente tipoPaciente;
+    private EstatusCita estatusCita;
     private int noSesion;
     private BigDecimal costoTerapia;
+    private String email;
+    private String numeroTelefonico;
 
 }

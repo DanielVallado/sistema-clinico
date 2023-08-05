@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS `control_citas`.`citas` (
   `estatus_cita` VARCHAR(45) NOT NULL,
   `no_sesion` INT NOT NULL,
   `costo_terapia` DECIMAL(14,2) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `numero_telefonico` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`, `paciente_id`))
 ENGINE = InnoDB;
 
