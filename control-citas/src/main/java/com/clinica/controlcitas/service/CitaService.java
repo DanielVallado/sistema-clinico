@@ -2,6 +2,7 @@ package com.clinica.controlcitas.service;
 
 import com.clinica.controlcitas.client.IPacienteClient;
 import com.clinica.controlcitas.dto.CitaDTO;
+import com.clinica.controlcitas.dto.client.EmailDto;
 import com.clinica.controlcitas.dto.client.PacienteDTO;
 import com.clinica.controlcitas.enums.EstatusCita;
 import com.clinica.controlcitas.error.CCException;
@@ -66,6 +67,11 @@ public class CitaService {
         String token = RandomStringUtils.randomAlphanumeric(32);
 
         // Enviar el correo de confirmación
+        EmailDto email = new EmailDto();
+        email.setToUser(new String[]{cita.getEmail()});
+        email.setSubject("Confirmación de Cita");
+        email.setMessage("¡Gracias por agendar tu cita! Haz clic en el siguiente enlace para confirmar:\n"
+                + "http://localhost:8072/control-citas/citas/confirmar-cita?id=" + cita.getId());
         emailService.sendConfirmationEmail(cita.getEmail(), token);
         return repository.save(cita);
     }

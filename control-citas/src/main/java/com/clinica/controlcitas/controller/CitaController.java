@@ -104,8 +104,8 @@ public class CitaController {
     }
 
     @PostMapping("/confirmar-cita")
-    public ResponseEntity<String> confirmarCita(@RequestParam("token") String token) {
-        Cita cita = citaRepository.findByToken(token);
+    public ResponseEntity<String> confirmarCita(@RequestParam("id") String id) {
+        Cita cita = citaRepository.findByToken(id);
         if (cita == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cita no encontrada.");
         }
