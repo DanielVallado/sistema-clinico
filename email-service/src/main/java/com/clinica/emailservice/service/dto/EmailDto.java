@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class EmailDto {
+public class EmailDto implements Serializable {
 
     private String[] toUser;
     private String subject;

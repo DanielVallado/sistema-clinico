@@ -1,5 +1,7 @@
 package com.clinica.emailservice.service.service;
 
+import com.clinica.emailservice.publisher.EmailPublisher;
+import com.clinica.emailservice.service.dto.EmailDto;
 import com.clinica.emailservice.service.error.ESException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,33 +14,33 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class EmailService {
 
-    private Environment env;
-    private JavaMailSender mailSender;
+    private final Environment env;
+    private final JavaMailSender mailSender;
 
     @Autowired
-    private void setMailSender(JavaMailSender mailSender) {
+    public EmailService(Environment env, JavaMailSender mailSender) {
+        this.env = env;
         this.mailSender = mailSender;
     }
 
-    @Autowired
-    private void setEnv(Environment env) {
-        this.env = env;
+    public void enqueueEmail(EmailDto emailDTO) throws ESException {
+        verifyEmail(emailDTO);
+        EmailPublisher.send(emailDTO);
+        log.info("Email enviado a la cola.");
     }
 
-    public void sendEmail(String[] toUser, String subject, String message) throws ESException {
-        verifyEmail(toUser, subject, message);
-
+    public void sendEmail(EmailDto emailDTO) {
         SimpleMailMessage email = new SimpleMailMessage();
         email.setFrom(env.getProperty("email.props.gmail.user"));
-        email.setTo(toUser);
-        email.setSubject(subject);
-        email.setText(message);
+        email.setTo(emailDTO.getToUser());
+        email.setSubject(emailDTO.getSubject());
+        email.setText(emailDTO.getMessage());
         mailSender.send(email);
         log.info("Correo enviado.");
     }
 
-    private void verifyEmail(String[] toUser, String subject, String message) throws ESException {
-        if (toUser == null | subject.isBlank() | message.isBlank()) {
+    private void verifyEmail(EmailDto email) throws ESException {
+        if (email.getToUser() == null | email.getSubject().isBlank() | email.getMessage().isBlank()) {
             throw new ESException("Datos inválidos");
         }
     }

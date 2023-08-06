@@ -28,7 +28,7 @@ public class EmailController {
     public ResponseEntity<?> sendEmail(@RequestBody EmailDto emailDto) {
         try {
             log.info("Envío de email.");
-            service.sendEmail(emailDto.getToUser(), emailDto.getSubject(), emailDto.getMessage());
+            service.enqueueEmail(emailDto);
             return new ResponseEntity<>("Email enviado.", HttpStatus.OK);
         } catch (ESException e) {
             log.warn(e.getMessage());
