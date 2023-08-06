@@ -46,6 +46,24 @@ spring:
               args:
                 name: CircuitBreaker
                 fallbackUri: forward:/error
+        - id: get-control-reportes
+          uri: lb://control-reportes
+          predicates:
+            - Path=/control-reportes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
+        - id: get-email-service
+          uri: lb://email-service
+          predicates:
+            - Path=/email-service/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CircuitBreaker
+                fallbackUri: forward:/error
 
 eureka:
   client:
