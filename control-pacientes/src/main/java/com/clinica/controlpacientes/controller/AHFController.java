@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class AHFController {
 
-    @Autowired
     private AHFService service;
+
+    @Autowired
+    private void setService(AHFService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllAHF() {

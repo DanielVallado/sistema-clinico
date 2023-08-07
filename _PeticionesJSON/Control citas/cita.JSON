@@ -1,0 +1,9 @@
+{
+  "pacienteId": 13,
+  "fechaHora": "2023-08-10T10:00:00",
+  "tipoPaciente": "SUBSECUENTE",
+  "noSesion": 1,
+  "costoTerapia": 5450.99,
+  "email": "danielvalladoorozco@gmail.com",
+  "numeroTelefonico": "9991853156"
+}

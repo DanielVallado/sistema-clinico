@@ -1,0 +1,65 @@
+{
+  "creacionExpediente": "2023-07-28",
+  "nombre": "Ana",
+  "apellidos": "García",
+  "fechaNacimiento": "1990-05-15",
+  "direccion": "Calle Principal 123",
+  "telefono": "555-123-4567",
+  "email": "ana.garcia@gmail.com",
+  "estadoCivil": "Soltera",
+  "escolaridad": "Licenciatura",
+  "ocupacion": "Ingeniera",
+  "antecedentesHeredoFamiliares": {
+    "cardiopatias": false,
+    "alergias": true,
+    "diabetes": false,
+    "nefropatias": false,
+    "psiquiatricos": true,
+    "neurologicas": false,
+    "otrosSindromes": "Ninguno"
+  },
+  "antecedentesPersonalesNoPatologicos": {
+    "habitosPersonales": "Buenos hábitos",
+    "banno": "Diario",
+    "habitacion": "Propia",
+    "tabaquismo": false,
+    "alcoholismo": false,
+    "vacunas": "Completas",
+    "actividadFisica": "Regular",
+    "alimentacion": "Saludable",
+    "estadoCivil": "Soltero/a",
+    "zoonosis": false
+  },
+  "antecedentesPersonalesPatologicos": {
+    "cirugias": "Ninguna",
+    "adicciones": "Ninguna",
+    "traumatismos": "Ninguno",
+    "ets": "Ninguna",
+    "alergias": "Polen",
+    "padecimientosArticulares": "Ninguno"
+  },
+  "antecedentesGinecoObstetricos": {
+    "menarca": "2005-01-01",
+    "ritmoMenstrual": "Regular",
+    "ipsa": 30,
+    "partos": 0,
+    "fup": "2023-07-28",
+    "abortos": 0,
+    "cesareas": 0
+  },
+  "antecedentesPerinatales": {
+    "fechaNacimiento": "1990-05-15",
+    "sdg": 38,
+    "apgar": 9,
+    "peso": 3.5,
+    "talla": 50.0,
+    "numeroEmbarazo": 1,
+    "problemasDuranteParto": "Ninguno"
+  },
+  "padecimientoActual": {
+    "inicio": "2023-07-20",
+    "descripcion": "Dolor de cabeza y fiebre",
+    "evolucion": "Mejorando con tratamiento",
+    "estadoActual": "Estable"
+  }
+}

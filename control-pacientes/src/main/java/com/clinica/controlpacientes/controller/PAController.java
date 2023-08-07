@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class PAController {
 
-    @Autowired
     private PAService service;
+
+    @Autowired
+    private void setService(PAService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllPA() {

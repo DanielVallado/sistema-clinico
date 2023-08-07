@@ -102,4 +102,18 @@ public class HistorialClinicoService {
         }
     }
 
+
+    public void deleteHistorialClinicoByPacienteId(Long pacienteId) {
+        diagnosticoService.deleteDiagnosticoByPacienteId(pacienteId);
+        estudiosService.deleteEstudiosByPacienteId(pacienteId);
+        exploracionFisicaService.deleteExploracionByPacienteId(pacienteId);
+        pronosticoService.deletePronosticoByPacienteId(pacienteId);
+        revaloracionService.deleteRevaloracion(pacienteId);
+    }
+
+    public void deleteHistorialClinicoBySistemaId(Long sistemaId) {
+        diagnosticoService.deleteDiagnosticoBySistemaId(sistemaId);
+        revaloracionService.deleteRevaloracionBySistemaId(sistemaId);
+    }
+
 }

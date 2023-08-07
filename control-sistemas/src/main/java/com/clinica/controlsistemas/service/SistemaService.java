@@ -1,5 +1,6 @@
 package com.clinica.controlsistemas.service;
 
+import com.clinica.controlsistemas.client.IHistorialClinicoClient;
 import com.clinica.controlsistemas.dto.SistemaDTO;
 import com.clinica.controlsistemas.error.CSException;
 import com.clinica.controlsistemas.mapper.SistemaMapper;
@@ -18,6 +19,12 @@ import java.util.stream.Collectors;
 public class SistemaService {
 
     private SistemaRepository repository;
+    private IHistorialClinicoClient historialClinicoClient;
+
+    @Autowired
+    private void setHistorialClinicoClient(IHistorialClinicoClient historialClinicoClient) {
+        this.historialClinicoClient = historialClinicoClient;
+    }
 
     @Autowired
     private void setRepository(SistemaRepository repository) {
@@ -47,6 +54,7 @@ public class SistemaService {
 
     public void deleteSistema(Long id) {
         repository.deleteById(id);
+        historialClinicoClient.deleteHistorialClinicoBySistemaId(id);
     }
 
 }

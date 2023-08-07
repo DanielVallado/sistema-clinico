@@ -15,7 +15,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,17 +61,10 @@ public class ReporteService {
         return filterPacientesSubsecuentes(fechaInicial, fechaFinal, listCitas);
     }
 
-
     private List<CitaDTO> filterCitasByDate(Date fechaInicial, Date fechaFinal, List<CitaDTO> citas) {
         return citas.stream()
                 .filter(cita -> isDateInRange(cita.getFechaHora(), fechaInicial, fechaFinal))
                 .collect(Collectors.toList());
-    }
-
-    private boolean isDateInRange(LocalDateTime dateTime, Date fechaInicial, Date fechaFinal) {
-        Instant instant = dateTime.toInstant(ZoneOffset.UTC);
-        Date date = Date.from(instant);
-        return !date.before(fechaInicial) && !date.after(fechaFinal);
     }
 
     private List<CitaDTO> filterByDateAndStatus(Date fechaInicial, Date fechaFinal, List<CitaDTO> citas) {
@@ -85,11 +80,21 @@ public class ReporteService {
     }
 
     private List<PacienteDTO> filterPacientesSubsecuentes(Date fechaInicial, Date fechaFinal, List<CitaDTO> citas) {
+        Set<Long> uniquePacienteIds = new HashSet<>();
+
         return citas.stream()
                 .filter(cita -> cita.getTipoPaciente().equals(TipoPaciente.SUBSECUENTE))
                 .filter(cita -> isDateInRange(cita.getFechaHora(), fechaInicial, fechaFinal))
+                .filter(cita -> uniquePacienteIds.add(cita.getPacienteId()))
                 .map(cita -> pacienteClient.findPacienteById(cita.getPacienteId()).getBody())
                 .collect(Collectors.toList());
+    }
+
+
+    private boolean isDateInRange(LocalDateTime dateTime, Date fechaInicial, Date fechaFinal) {
+        Instant instant = dateTime.toInstant(ZoneOffset.UTC);
+        Date date = Date.from(instant);
+        return !date.before(fechaInicial) && !date.after(fechaFinal);
     }
 
 }

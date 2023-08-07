@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class APController {
 
-    @Autowired
     private APService service;
+
+    @Autowired
+    private void setService(APService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllAP() {

@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class AGOController {
 
-    @Autowired
     private AGOService service;
+
+    @Autowired
+    private void setService(AGOService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllAGO() {

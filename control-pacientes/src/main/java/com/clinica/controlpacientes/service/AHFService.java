@@ -15,8 +15,12 @@ import java.util.List;
 @Log4j2
 public class AHFService {
 
-    @Autowired
     private PacienteService pacienteService;
+
+    @Autowired
+    private void setPacienteService(PacienteService pacienteService) {
+        this.pacienteService = pacienteService;
+    }
 
     public List<AHF_DTO> getAllAHF() throws Exception {
         List<Paciente> pacientes = pacienteService.getAllPacientes();
