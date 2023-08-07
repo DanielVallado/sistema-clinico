@@ -1,5 +1,6 @@
 package com.clinica.controlcitas.service;
 
+import com.clinica.controlcitas.client.IEmailClient;
 import com.clinica.controlcitas.client.IPacienteClient;
 import com.clinica.controlcitas.dto.CitaDTO;
 import com.clinica.controlcitas.dto.client.EmailDto;
@@ -11,29 +12,27 @@ import com.clinica.controlcitas.model.Cita;
 import com.clinica.controlcitas.repository.CitaRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 public class CitaService {
 
-    private CitaRepository repository;
-    private IPacienteClient pacienteClient;
+    private final CitaRepository repository;
+    private final IPacienteClient pacienteClient;
+    private final IEmailClient emailClient;
 
     @Autowired
-    private void setRepository(CitaRepository repository) {
+    public CitaService(CitaRepository repository, IPacienteClient pacienteClient, IEmailClient emailClient) {
         this.repository = repository;
-    }
-
-    @Autowired
-    private void setCitaClient(IPacienteClient pacienteClient) {
         this.pacienteClient = pacienteClient;
+        this.emailClient = emailClient;
     }
 
     public List<CitaDTO> getAllCitas() throws Exception {
@@ -60,20 +59,32 @@ public class CitaService {
                 .collect(Collectors.toList());
     }
 
-    public Cita createCita(Cita cita) {
+    public Cita getCitaById(Long id) throws Exception {
+        Optional<Cita> cita = repository.findById(id);
+        if (cita.isEmpty()) {
+            throw new CCException("No se encontraron datos.");
+        }
+
+        return cita.get();
+    }
+
+    public CitaDTO createCita(Cita cita) throws Exception {
+        if (cita.getId() != null) {
+            throw new CCException("No puede contener un ID preestablecido.");
+        }
+
         pacienteClient.findPacienteById(cita.getPacienteId());
         cita.setEstatusCita(EstatusCita.AGENDADA);  // Estado default
-        // Generar el token único
-        String token = RandomStringUtils.randomAlphanumeric(32);
+        cita = repository.save(cita);
+        sendEmail(cita);
+        return CitaMapper.mapToDTO(getPacienteById(cita.getPacienteId()), cita);
+    }
 
-        // Enviar el correo de confirmación
-        EmailDto email = new EmailDto();
-        email.setToUser(new String[]{cita.getEmail()});
-        email.setSubject("Confirmación de Cita");
-        email.setMessage("¡Gracias por agendar tu cita! Haz clic en el siguiente enlace para confirmar:\n"
-                + "http://localhost:8072/control-citas/citas/confirmar-cita?id=" + cita.getId());
-        emailService.sendConfirmationEmail(cita.getEmail(), token);
-        return repository.save(cita);
+    public CitaDTO updateCita(Long id, Cita newCita) throws Exception {
+        this.getCitaById(id);
+        newCita.setId(id);
+        Cita updatedCita = repository.save(newCita);
+        return CitaMapper.mapToDTO(getPacienteById(updatedCita.getPacienteId()), updatedCita);
     }
 
     public void deleteCita(Long id) {
@@ -85,9 +96,31 @@ public class CitaService {
         repository.deleteAllByPacienteId(pacienteId);
     }
 
+    public CitaDTO confirmarCita(Long id) throws Exception {
+        Cita cita = this.getCitaById(id);
+        cita.setEstatusCita(EstatusCita.CONFIRMADA);
+        return updateCita(id, cita);
+    }
+
+    public CitaDTO cancelarCita(Long id) throws Exception {
+        Cita cita = this.getCitaById(id);
+        cita.setEstatusCita(EstatusCita.CANCELADA);
+        return updateCita(id, cita);
+    }
+
     private PacienteDTO getPacienteById(Long pacienteId) {
         ResponseEntity<PacienteDTO> response = pacienteClient.findPacienteById(pacienteId);
         return response.getBody();
+    }
+
+    private void sendEmail(Cita cita) {
+        EmailDto email = new EmailDto();
+        email.setToUser(new String[]{cita.getEmail()});
+        email.setSubject("Confirmación de Cita");
+        email.setMessage("¡Gracias por agendar tu cita! Haz click en el siguiente enlace para confirmar: \n"
+                + "http://localhost:8072/control-citas/citas/confirmar-cita?id=" + cita.getId());
+        emailClient.sendEmail(email);
+        log.info("Email de confirmación enviado.");
     }
 
 }

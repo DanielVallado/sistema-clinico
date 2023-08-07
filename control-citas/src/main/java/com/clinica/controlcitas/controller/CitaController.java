@@ -1,5 +1,6 @@
 package com.clinica.controlcitas.controller;
 
+import com.clinica.controlcitas.dto.CitaDTO;
 import com.clinica.controlcitas.error.CCException;
 import com.clinica.controlcitas.model.Cita;
 import com.clinica.controlcitas.service.CitaService;
@@ -47,6 +48,8 @@ public class CitaController {
             return ResponseEntity.ok().body(service.getCitasByPacienteId(id));
         } catch (FeignException e) {
             log.warn("No se encontro al paciente.");
+            log.error(e.getMessage());
+            log.error(e);
             return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
         } catch (CCException e) {
             log.warn("No se encontraron citas.");
@@ -62,7 +65,7 @@ public class CitaController {
     public ResponseEntity<?> createCita(@RequestBody @Validated Cita cita) {
         try {
             log.info("Cita insertada.");
-            Cita response = service.createCita(cita);
+            CitaDTO response = service.createCita(cita);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (FeignException e) {
             log.warn("No se encontro al paciente.");
@@ -73,6 +76,24 @@ public class CitaController {
         } catch (Exception e) {
             log.error("Error al registrar la cita: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al registrar la cita.");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCita(@RequestBody @Validated Cita cita, @PathVariable("id") Long id) {
+        try {
+            log.info("Cita actualizada.");
+            CitaDTO response = service.updateCita(id, cita);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (FeignException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro al paciente.", HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException | HttpMessageNotReadableException e) {
+            log.error("Datos inválidos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Datos inválidos.");
+        } catch (Exception e) {
+            log.error("Error al registrar la cita: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al actualizar la cita.");
         }
     }
 
@@ -103,18 +124,32 @@ public class CitaController {
         }
     }
 
-    @PostMapping("/confirmar-cita")
-    public ResponseEntity<String> confirmarCita(@RequestParam("id") String id) {
-        Cita cita = citaRepository.findByToken(id);
-        if (cita == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cita no encontrada.");
+    @GetMapping("/confirmar-cita")
+    public ResponseEntity<?> confirmarCita(@RequestParam("id") Long id) {
+        try {
+            CitaDTO cita = service.confirmarCita(id);
+            return ResponseEntity.status(HttpStatus.CREATED).body(cita);
+        } catch (CCException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro la cita con ID %s.".formatted(id), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error al eliminar la cita: ", e);
+            return new ResponseEntity<>("Error al eliminar la cita.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        cita.setEstatusCita("confirmada");
-        citaRepository.save(cita);
-
-        return ResponseEntity.ok("Cita confirmada exitosamente.");
     }
-}
+
+    @GetMapping("/cancelar-cita")
+    public ResponseEntity<?> cancelarCita(@RequestParam("id") Long id) {
+        try {
+            CitaDTO cita = service.cancelarCita(id);
+            return ResponseEntity.status(HttpStatus.OK).body(cita);
+        } catch (CCException e) {
+            log.warn("No se encontro al paciente.");
+            return new ResponseEntity<>("No se encontro la cita con ID %s.".formatted(id), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error al eliminar la cita: ", e);
+            return new ResponseEntity<>("Error al eliminar la cita.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

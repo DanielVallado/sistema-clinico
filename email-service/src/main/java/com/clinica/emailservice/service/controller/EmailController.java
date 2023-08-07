@@ -29,7 +29,7 @@ public class EmailController {
         try {
             log.info("Envío de email.");
             service.enqueueEmail(emailDto);
-            return new ResponseEntity<>("Email enviado.", HttpStatus.OK);
+            return new ResponseEntity<>(emailDto, HttpStatus.OK);
         } catch (ESException e) {
             log.warn(e.getMessage());
             log.error(e);

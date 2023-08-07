@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -10,10 +11,10 @@
 	</parent>
 
 	<groupId>com.clinica</groupId>
-	<artifactId>control-citas</artifactId>
+	<artifactId>control-reportes</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>control-citas</name>
-	<description>control-citas</description>
+	<name>control-reportes</name>
+	<description>control-reportes</description>
 
 	<properties>
 		<java.version>17</java.version>
@@ -68,7 +69,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
-
 	</dependencies>
 
 	<dependencyManagement>
