@@ -1,8 +1,13 @@
 # Sistema clínico
 Este proyecto emula el manejo de datos de una clínica para pacientes de rehabilitación física con la implementación de una arquitectura basada en microservicios, elaborado con Spring Boot.
 
+## Elaborado por:
+- Daniel Eduardo Vallado Orozco
+- Juan Omar Trivellari Ramirez
+
 ## Control pacientes
 Este microservicio es el principal, pues es donde gestionamos directamente los pacientes que forman parte de la clínica, aquí tenemos la disponibilidad de obtener, crear y eliminar registros de pacientes.
+
 #### Entidades
 - Paciente
 - Antecedentes heredo familiares
@@ -42,4 +47,3 @@ Este microservicio se encarga de hacer el envío de emails y se implementó en c
 - Config service
 - Discover service (Eureka)
 - Gateway
-
