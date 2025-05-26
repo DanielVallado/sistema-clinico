@@ -9,8 +9,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/control_pacientes
-    username: root
-    password: "1234"
+    username: test
+    password: "contraseña1234"
   jpa:
     show-sql: true
     hibernate:
